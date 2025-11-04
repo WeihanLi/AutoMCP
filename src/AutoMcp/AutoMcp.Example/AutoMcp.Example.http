@@ -1,0 +1,6 @@
+@AutoMcp.Example_HostAddress = http://localhost:5257
+
+GET {{AutoMcp.Example_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

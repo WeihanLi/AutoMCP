@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AutoMcp.AppHost/AutoMcp.AppHost.csproj" />
+  <Project Path="AutoMcp.Example/AutoMcp.Example.csproj" />
+  <Project Path="AutoMcp.OData/AutoMcp.OData.csproj" />
+  <Project Path="AutoMcp/AutoMcp.csproj" />
+</Solution>
