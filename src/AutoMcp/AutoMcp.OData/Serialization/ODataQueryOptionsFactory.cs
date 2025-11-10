@@ -29,7 +29,7 @@ public class ODataQueryOptionsFactory : IODataQueryOptionsFactory
     /// <inheritdoc/>
     public ODataQueryOptions<TEntity> Create<TEntity>(IDictionary<string, string> queryParameters)
      where TEntity : class
-  => Create<TEntity>(_serviceProvider, _oDataQueryContextFactory.CreateODataQueryContext<TEntity>(queryParameters), queryParameters);
+        => Create<TEntity>(_serviceProvider, _oDataQueryContextFactory.CreateODataQueryContext<TEntity>(), queryParameters);
 
     /// <inheritdoc/>
     public ODataQueryOptions<TEntity> Create<TEntity>(ODataQueryContext context, IDictionary<string, string> queryParameters)
@@ -79,6 +79,7 @@ public class ODataQueryOptionsFactory : IODataQueryOptionsFactory
         oDataFeature.Model = context.Model;
         oDataFeature.Path = context.Path;
         oDataFeature.Services = serviceProvider.CreateScope().ServiceProvider;
+
         return request;
     }
 }

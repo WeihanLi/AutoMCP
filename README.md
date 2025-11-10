@@ -1,6 +1,15 @@
-﻿# AutoMCP
-
+﻿# <img src="logo/AutoMCP.svg" alt="AutoMCP logo" width="50" /> AutoMCP
 Automatically create an MCP (Model Context Protocol) Server from your ASP.NET Core APIs.
+
+[![NuGet Version](https://img.shields.io/nuget/v/AutoMcp?label=AutoMCP)](https://www.nuget.org/packages/AutoMcp/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/AutoMcp?label=Downloads)](https://www.nuget.org/packages/AutoMcp/)
+
+[![NuGet Version](https://img.shields.io/nuget/v/AutoMcp.OData?label=AutoMCP.OData)](https://www.nuget.org/packages/AutoMcp.OData/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/AutoMcp.OData?label=Downloads)](https://www.nuget.org/packages/AutoMcp.OData/)
+
+[![License](https://img.shields.io/badge/license-Unlicense-blue.svg?style=flat-square)](LICENSE)
+
+
 
 ## 🚀 Overview
 

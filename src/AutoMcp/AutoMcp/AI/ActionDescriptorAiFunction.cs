@@ -60,9 +60,12 @@ public class ActionDescriptorAiFunction : AIFunction
 
         JsonSchema = AIJsonUtilities.CreateFunctionJsonSchema(UnderlyingMethod, serializerOptions: jsonSerializerOptions, inferenceOptions: schemaCreateOptions);
 
-        var responseTypes = actionDescriptor.EndpointMetadata.OfType<ProducesResponseTypeAttribute>()
-            .DistinctBy(attribute => attribute.Type)
-            .Select(attribute => AIJsonUtilities.CreateJsonSchema(attribute.Type, serializerOptions: jsonSerializerOptions, inferenceOptions: schemaCreateOptions))
+        var rawResponseTypes = actionDescriptor.EndpointMetadata.OfType<ProducesResponseTypeAttribute>().Select(a => a.Type)
+            .Concat(actionDescriptor.EndpointMetadata.OfType<ProducesErrorResponseTypeAttribute>().Select(a => a.Type));
+
+        var responseTypes = rawResponseTypes
+            .DistinctBy(type => type)
+            .Select(type => AIJsonUtilities.CreateJsonSchema(type, serializerOptions: jsonSerializerOptions, inferenceOptions: schemaCreateOptions))
             .ToList();
 
         var methodResponseType = AIJsonUtilities.CreateJsonSchema(actionDescriptor.MethodInfo.ReturnType, serializerOptions: jsonSerializerOptions, inferenceOptions: schemaCreateOptions);
@@ -96,24 +99,41 @@ public class ActionDescriptorAiFunction : AIFunction
     /// <inheritdoc/>
     protected override async ValueTask<object?> InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
     {
-        // Get required services
-        var services = arguments.Services ?? throw new ArgumentException($"{nameof(arguments.Services)} is required.", nameof(arguments));
-        using var scope = services.CreateScope();
-        var provider = scope.ServiceProvider;
-        var httpContext = provider.GetRequiredService<IHttpContextAccessor>().HttpContext ?? throw new InvalidOperationException("No HttpContext present.");
-        var jsonOptions = provider.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions;
+        try
+        {
+            // Get required services
+            var services = arguments.Services ?? throw new ArgumentException($"{nameof(arguments.Services)} is required.", nameof(arguments));
+            using var scope = services.CreateScope();
+            var provider = scope.ServiceProvider;
+            var httpContext = provider.GetRequiredService<IHttpContextAccessor>().HttpContext ?? throw new InvalidOperationException("No HttpContext present.");
+            var jsonOptions = provider.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions;
 
-        // Modify the HttpContext to match the target controller action
-        ModifyRequestToFitTargetMethod(httpContext, arguments);
+            // Modify the HttpContext to match the target controller action
+            ModifyRequestToFitTargetMethod(httpContext, arguments);
 
-        // Create the controller and parameters
-        var controller = ActivatorUtilities.CreateInstance(provider, _actionDescriptor.ControllerTypeInfo.AsType());
-        var parameters = CreateParameterArray(arguments, jsonOptions);
+            // Create the controller and parameters
+            var controller = ActivatorUtilities.CreateInstance(provider, _actionDescriptor.ControllerTypeInfo.AsType());
+            var parameters = CreateParameterArray(arguments, jsonOptions);
 
-        // Execute the action method
-        var result = await InvokeControllerMethod(controller, parameters);
+            // Execute the action method
+            var result = await InvokeControllerMethod(controller, parameters);
 
-        return result;
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return new ProblemDetails
+            {
+                Detail = ex.Message,
+                Status = 500,
+                Title = $"An error occured while invoking {_actionDescriptor.ControllerName}.{_actionDescriptor.ActionName}",
+                Extensions =
+                {
+                    ["ExceptionType"] = ex.GetType().Name,
+                    ["StackTrace"] = ex.StackTrace,
+                }
+            };
+        }
     }
 
     private async Task<object?> InvokeControllerMethod(object controller, object?[] parameters)

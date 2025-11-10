@@ -31,6 +31,7 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet(Name = "GetWeatherForecast")]
     [Description("Get the weather forecast for the given date.")]
+    [ProducesErrorResponseType(typeof(ProblemDetails))]
     public ActionResult<WeatherForecast> Get(DateOnly date)
     {
         var forecast = new WeatherForecast
@@ -45,6 +46,7 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet(Name = "GetMultipleWeatherForecasts")]
     [Description("Get multiple weather forecasts for the next number of days.")]
+    [ProducesErrorResponseType(typeof(ProblemDetails))]
     public ActionResult<IEnumerable<WeatherForecast>> GetMultiple(ODataQueryOptions<WeatherForecast> options)
     {
         return Ok(options.ApplyTo(_repository));

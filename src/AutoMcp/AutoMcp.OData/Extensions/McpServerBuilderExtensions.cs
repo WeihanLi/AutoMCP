@@ -1,5 +1,6 @@
 ﻿using AutoMcp.OData.Serialization;
 using Microsoft.AspNetCore.OData;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -25,6 +26,9 @@ public static class McpServerBuilderExtensions
         builder.Services.AddSingleton<IODataQueryContextFactory, ODataQueryContextFactory>();
         builder.Services.AddSingleton<IODataQueryOptionsFactory, ODataQueryOptionsFactory>();
         builder.Services.ConfigureOptions<ConfigureODataJsonOptions>();
+        
+        // Register case-insensitive OData URI resolver
+        builder.Services.AddSingleton<ODataUriResolver>(sp => new UnqualifiedODataUriResolver { EnableCaseInsensitive = true });
 
         return builder;
     }

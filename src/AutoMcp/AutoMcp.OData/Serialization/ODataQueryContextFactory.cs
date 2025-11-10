@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using Microsoft.OData.UriParser;
 using System;
-using System.Collections.Generic;
 
 namespace AutoMcp.OData.Serialization;
 
@@ -26,12 +26,12 @@ public class ODataQueryContextFactory : IODataQueryContextFactory
     }
 
     /// <inheritdoc/>
-    public ODataQueryContext CreateODataQueryContext<T>(IDictionary<string, string> normalizedQueryParameters)
+    public ODataQueryContext CreateODataQueryContext<T>()
         where T : class
     {
         var entityClrType = typeof(T);
         var model = GetEdmModel(entityClrType);
-        Microsoft.OData.UriParser.ODataPath path = new();
+        ODataPath path = new();
         var context = new ODataQueryContext(model, entityClrType, path);
 
         return context;
